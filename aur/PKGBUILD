@@ -1,0 +1,32 @@
+# Maintainer: Pacman99 <pacman99@users.noreply.github.com>
+pkgname=pinentry-dms
+pkgver=0.1.0
+pkgrel=1
+pkgdesc='DMS-styled pinentry for GPG and RBW'
+arch=('x86_64' 'aarch64')
+url='https://github.com/Pacman99/DankPinentry'
+license=('MIT')
+depends=('glibc')
+makedepends=('go')
+provides=('pinentry')
+source=("${pkgname}-${pkgver}.tar.gz::${url}/archive/v${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+prepare() {
+  cd "DankPinentry-${pkgver}"
+  export GOPATH="${srcdir}/gopath"
+  go mod download
+}
+
+build() {
+  cd "DankPinentry-${pkgver}"
+  export CGO_ENABLED=0
+  export GOFLAGS='-buildmode=pie -trimpath -mod=readonly -modcacherw'
+  export GOPATH="${srcdir}/gopath"
+  go build -ldflags '-s -w' -o "${pkgname}" ./cmd/pinentry-dms/
+}
+
+package() {
+  cd "DankPinentry-${pkgver}"
+  install -Dm755 "${pkgname}" "${pkgdir}/usr/bin/${pkgname}"
+}
